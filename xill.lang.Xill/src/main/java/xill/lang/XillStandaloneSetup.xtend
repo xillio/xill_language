@@ -9,6 +9,7 @@ import java.io.File;
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import javax.inject.Named
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
@@ -31,6 +32,7 @@ class XillStandaloneSetup extends XillStandaloneSetupGenerated {
         }
 
         @Provides
+        @Named("projectFolder")
         def File projecFolder() {
             return setup.projectFolder
         }
