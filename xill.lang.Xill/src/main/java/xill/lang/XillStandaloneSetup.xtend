@@ -13,16 +13,13 @@ import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
  */
+@FinalFieldsConstructor
 class XillStandaloneSetup extends XillStandaloneSetupGenerated {
 
-    private File projectFolder
+    private final File projectFolder
 
     def override createInjector() {
         Guice.createInjector(Modules.override(new XillRuntimeModule()).with(new ProjectOverride(this)))
-    }
-
-    def void setProjectFolder(File folder) {
-        this.projectFolder = folder
     }
 
     @FinalFieldsConstructor
