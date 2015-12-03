@@ -35,4 +35,9 @@ subprojects {
     configurations.all {
         exclude group: 'asm'
     }
+
+    dependencies {
+        testCompile 'org.testng:testng:6.9.8'
+        testCompile 'org.mockito:mockito-all:1.10.19'
+    }
 }
