@@ -3,13 +3,40 @@
  */
 package xill.lang
 
+import com.google.inject.Guice
+import com.google.inject.util.Modules
+import java.io.File;
+import com.google.inject.AbstractModule
+import com.google.inject.Provides
+import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
  */
 class XillStandaloneSetup extends XillStandaloneSetupGenerated {
-    
-	def static void doSetup() {
-        new XillStandaloneSetup().createInjectorAndDoEMFRegistration()
-	}
+
+    private File projectFolder
+
+    def override createInjector() {
+        Guice.createInjector(Modules.override(new XillRuntimeModule()).with(new ProjectOverride(this)))
+    }
+
+    def void setProjectFolder(File folder) {
+        this.projectFolder = folder
+    }
+
+    @FinalFieldsConstructor
+    static private class ProjectOverride extends AbstractModule {
+        private final XillStandaloneSetup setup
+
+        override configure() {
+
+        }
+
+        @Provides
+        def File projecFolder() {
+            return setup.projectFolder
+        }
+
+    }
 }
