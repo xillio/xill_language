@@ -1,0 +1,169 @@
+grammar xill.lang.Xill with org.eclipse.xtext.common.Terminals
+
+generate xill "http://www.lang.xill/Xill"
+
+//The main robot
+Robot:
+	(uses+=UseStatement)*
+	(includes+=IncludeStatement)*
+	instructionSet = InstructionSet;
+
+UseStatement:
+	'use' (plugin=ID 'as')? name=ID ';';
+
+IncludeStatement:
+	{IncludeStatement}
+	'include' name+=ID ('.' name+=ID)* ';';
+
+InstructionSet:
+	{InstructionSet}
+	instructions+=Instruction*;
+
+InstructionBlock:
+	'{' instructionSet=InstructionSet '}';
+
+	//Generally a line of code
+Instruction:
+	FunctionDeclaration |
+	VariableDeclaration |
+	ExpressionInstruction |
+	IfInstruction |
+	WhileInstruction |
+	ForEachInstruction |
+	ReturnInstruction |
+	ContinueInstruction |
+	BreakInstruction;
+
+ExpressionInstruction:
+	expression = Expression ';'
+;
+
+FunctionDeclaration:
+	(private ?= 'private')? 'function' name=ID '(' (parameters+=Target (',' parameters+=Target)*)? ')'
+	instructionBlock=InstructionBlock;
+
+VariableDeclaration:
+	'var' name=Target ('=' value=Expression)? ';';
+
+IfInstruction:
+	'if' '(' conditions+=Expression ')' instructionBlocks+=InstructionBlock 
+	('else''if''('conditions+=Expression')' instructionBlocks += InstructionBlock)* 
+	('else' elseBlock=InstructionBlock)?;
+
+WhileInstruction:
+	'while' '(' condition=Expression ')' instructionBlock=InstructionBlock;
+
+ForEachInstruction:
+	'foreach' '(' (keyVar=Target ',')? valueVar=Target 'in' itterator=Expression ')'
+	instructionBlock=InstructionBlock;
+
+ReturnInstruction:
+	'return' {ReturnInstruction} (value=Expression)? ';';
+
+BreakInstruction:
+	{BreakInstruction}'break' ';';
+
+ContinueInstruction:
+	{ContinueInstruction}'continue' ';';
+
+	//A variable target
+Target:
+	name=ID;
+
+	//An expression that holds a value
+Expression:
+	Assignment;
+	
+Assignment returns Expression:
+	Or ({Assignment.left=current} op=('='|'+='|'-='|'*='|'/='|'::=') right=Or)*;
+
+Or returns Expression:
+	And ({Or.left=current} op='||' right=And)*;
+
+And returns Expression:
+	Equality ({And.left=current} op='&&' right=Equality)*;
+
+Equality returns Expression:
+	Comparison ({Equality.left=current} op=('==' | '!=') right=Comparison)*;
+
+Comparison returns Expression:
+	Addition ({Comparison.left=current} op=('>' | '<' | '>=' | '<=') right=Addition)*;
+
+Addition returns Expression:
+	Multiplication ({Addition.left=current} op=('+' | '-' | '::') right=Multiplication)*;
+
+Multiplication returns Expression:
+	Unary ({Multiplication.left=current} op=('*' | '/' | '%' | '^') right=Unary)*;
+
+Unary returns Expression:
+	prefix=('!' | '--' | '-' | '++' | '@') expression=ListExtraction | expression=ListExtraction (suffix=('--' | '++'))?;
+
+ListExtraction returns Expression:
+	Atomic ({ListExtraction.value=current} ('[' index=Expression? ']' | '.' child=ID))*;
+
+	//An atomic value (i.e. not resulting from an operation)
+Atomic returns Expression:
+	Literal | FunctionCall | ConstructCall | Variable | '(' Expression ')' | ObjectExpression | ListExpression |
+	CallbotExpression | GetArgumentExpression | MapExpression | FilterExpression;
+
+CallbotExpression:
+	{CallbotExpression} 'callbot' '(' path = Expression (',' argument = Expression)? ')';
+	
+MapExpression:
+	'map''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
+;
+
+FilterExpression:
+	'filter''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
+;
+	
+GetArgumentExpression:
+	{GetArgumentExpression} 'argument';
+
+ObjectExpression:
+	{ObjectExpression} '{' (names+=Expression ':' values+=Expression (',' names+=Expression ':' values+=Expression)*
+	','?)? '}';
+
+ListExpression:
+	{ListExpression} '[' (values+=Expression (',' values+=Expression)*)? ']';
+
+Variable:
+	target=[Target] (path+=ID)*;
+
+	//A call of a function: log("value")
+FunctionCall:
+	name=[FunctionDeclaration] argumentBlock=ArgumentBlock;
+
+ConstructCall:
+	package=[UseStatement] '.' function=ID argumentBlock=ArgumentBlock;
+
+	//A par. followed by any number of arguments
+ArgumentBlock:
+	{ArgumentBlock} '(' (parameters+=Expression (',' parameters+=Expression)*)? ')';
+
+	//A literal value
+Literal:
+	StringLiteral | IntegerLiteral | DecimalLiteral | BooleanLiteral | NullLiteral;
+
+DecimalLiteral:
+	{DecimalLiteral}
+	value=DEC_VAL | value = "NaN" | value = SCIENCE_VAL;
+
+	//INT
+IntegerLiteral:
+	{IntegerLiteral}
+	value=INT_VAL;
+
+	//STRING
+StringLiteral:
+	value=STRING | value = "ATOMIC" | value = "LIST" | value = "OBJECT";
+
+BooleanLiteral:
+	value=('true' | 'false');
+
+NullLiteral:
+	value='null';
+
+terminal INT_VAL: ('0'..'9')+;
+terminal DEC_VAL:  ('0'..'9')+ '.'  ('0'..'9')+;
+terminal SCIENCE_VAL: (DEC_VAL|INT_VAL) 'E' ('+' | '-') INT_VAL;

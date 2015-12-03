@@ -1,0 +1,3 @@
+include 'xill.lang.Xill'
+include 'xill.lang.Xill.ide'
+include 'xill.lang.Xill.web'
