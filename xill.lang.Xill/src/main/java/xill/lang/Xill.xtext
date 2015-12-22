@@ -9,7 +9,7 @@ Robot:
 	instructionSet = InstructionSet;
 
 UseStatement:
-	'use' (plugin=ID 'as')? name=ID ';';
+	'use' (plugin+=ID (',' plugin+=ID)* ';' | (plugin+=ID 'as')? name=ID ';');
 
 IncludeStatement:
 	{IncludeStatement}
