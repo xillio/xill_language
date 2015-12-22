@@ -8,8 +8,11 @@ Robot:
 	(includes+=IncludeStatement)*
 	instructionSet = InstructionSet;
 
+PluginCall:
+	(plugin=ID 'as')? name=ID ;
+
 UseStatement:
-	'use' (plugin+=ID (',' plugin+=ID)* ';' | (plugin+=ID 'as')? name=ID ';');
+	'use' plugins+=PluginCall (',' plugins+=PluginCall)* ';';
 
 IncludeStatement:
 	{IncludeStatement}
@@ -135,7 +138,7 @@ FunctionCall:
 	name=[FunctionDeclaration] argumentBlock=ArgumentBlock;
 
 ConstructCall:
-	package=[UseStatement] '.' function=ID argumentBlock=ArgumentBlock;
+	package=[PluginCall] '.' function=ID argumentBlock=ArgumentBlock;
 
 	//A par. followed by any number of arguments
 ArgumentBlock:
