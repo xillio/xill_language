@@ -1,5 +1,5 @@
 include 'xill.lang.Xill'
 
 // Temporarily disable web
-// include 'xill.lang.Xill.ide'
-// include 'xill.lang.Xill.web'
+//include 'xill.lang.Xill.ide'
+//include 'xill.lang.Xill.web'
