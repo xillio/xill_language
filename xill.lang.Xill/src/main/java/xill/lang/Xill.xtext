@@ -32,7 +32,8 @@ Instruction:
 	ForEachInstruction |
 	ReturnInstruction |
 	ContinueInstruction |
-	BreakInstruction;
+	BreakInstruction|
+	ErrorInstruction;
 
 ExpressionInstruction:
 	expression = Expression ';'
@@ -44,6 +45,12 @@ FunctionDeclaration:
 
 VariableDeclaration:
 	'var' name=Target ('=' value=Expression)? ';';
+
+ErrorInstruction:
+	'do' doBlocks=InstructionBlock
+	('error' errorBlocks=InstructionBlock)?
+	('succes' succesBlocks=InstructionBlock)?
+	('finally' finallyBlock=InstructionBlock)?;
 
 IfInstruction:
 	'if' '(' conditions+=Expression ')' instructionBlocks+=InstructionBlock 
