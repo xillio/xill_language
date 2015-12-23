@@ -47,9 +47,9 @@ VariableDeclaration:
 	'var' name=Target ('=' value=Expression)? ';';
 
 ErrorInstruction:
-	'do' doBlocks=InstructionBlock
-	('error' errorBlocks=InstructionBlock)?
-	('succes' succesBlocks=InstructionBlock)?
+	'do' doBlock=InstructionBlock
+	('error' errorBlock=InstructionBlock)?
+	('succes' succesBlock=InstructionBlock)?
 	('finally' finallyBlock=InstructionBlock)?;
 
 IfInstruction:

@@ -38,7 +38,8 @@ class XillValidator extends AbstractXillValidator {
         "return","continue","break",
         "callbot","argument",
         "map", "filter",
-        "private"
+        "private",
+        "do","succes","error","finally"
     ];
 
     @Inject
