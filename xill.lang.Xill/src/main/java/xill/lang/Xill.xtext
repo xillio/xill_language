@@ -4,15 +4,12 @@ generate xill "http://www.lang.xill/Xill"
 
 //The main robot
 Robot:
-	(uses+=UseStatement)*
+	('use' uses += UseStatement (',' uses += UseStatement)* ';')*
 	(includes+=IncludeStatement)*
 	instructionSet = InstructionSet;
 
-PluginCall:
-	(plugin=ID 'as')? name=ID ;
-
 UseStatement:
-	'use' plugins+=PluginCall (',' plugins+=PluginCall)* ';';
+	(plugin=ID 'as')? name=ID ;
 
 IncludeStatement:
 	{IncludeStatement}
@@ -138,7 +135,7 @@ FunctionCall:
 	name=[FunctionDeclaration] argumentBlock=ArgumentBlock;
 
 ConstructCall:
-	package=[PluginCall] '.' function=ID argumentBlock=ArgumentBlock;
+	package=[UseStatement] '.' function=ID argumentBlock=ArgumentBlock;
 
 	//A par. followed by any number of arguments
 ArgumentBlock:
