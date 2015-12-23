@@ -4,12 +4,12 @@ generate xill "http://www.lang.xill/Xill"
 
 //The main robot
 Robot:
-	(uses+=UseStatement)*
+	('use' uses += UseStatement (',' uses += UseStatement)* ';')*
 	(includes+=IncludeStatement)*
 	instructionSet = InstructionSet;
 
 UseStatement:
-	'use' (plugin=ID 'as')? name=ID ';';
+	(plugin=ID 'as')? name=ID ;
 
 IncludeStatement:
 	{IncludeStatement}
