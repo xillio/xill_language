@@ -48,7 +48,7 @@ VariableDeclaration:
 
 ErrorInstruction:
 	'do' doBlock=InstructionBlock
-	('error' errorBlock=InstructionBlock)?
+	('error' '(' (cause=Target)? ')' errorBlock=InstructionBlock)?
 	('succes' succesBlock=InstructionBlock)?
 	('finally' finallyBlock=InstructionBlock)?;
 
