@@ -34,9 +34,12 @@ import javax.inject.Named
  *
  */
 class XillScopeProvider extends AbstractDeclarativeScopeProvider {
-    @Inject
-    @Named("projectFolder")
-    private File projectFolder = new File(".");
+
+    private static File projectFolder = new File(".");
+
+    def static setProjectFolder(File folder) {
+        projectFolder = folder
+    }
 
     override getScope(EObject context, EReference reference) {
         switch(context) {
