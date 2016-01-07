@@ -21,6 +21,7 @@ import xill.lang.xill.IncludeStatement
 import com.google.inject.Inject
 import javax.inject.Named
 import java.io.File
+import com.google.inject.Provider
 
 //import org.eclipse.xtext.validation.Check
 
@@ -40,10 +41,14 @@ class XillValidator extends AbstractXillValidator {
         "map", "filter",
         "private"
     ];
+    public static final Object LOCK = new Object()
 
-    @Inject
-    @Named("projectFolder")
-    private File projectFolder
+    private static File projectFolder = new File(".")
+
+    def static setProjectFolder(File folder) {
+        projectFolder = folder
+    }
+
 
     @Check
     def checkExtractionNotOnLiterals(ListExtraction extraction) {
