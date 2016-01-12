@@ -48,20 +48,20 @@ VariableDeclaration:
 
 ErrorInstruction:
 	'do' doBlock=InstructionBlock
-	('error' ('(' (cause=Target)? ')')? errorBlock=InstructionBlock)?
-	('success' succesBlock=InstructionBlock)?
+	('fail' ('(' (cause=Target)? ')')? errorBlock=InstructionBlock)?
+	('success' successBlock=InstructionBlock)?
 	('finally' finallyBlock=InstructionBlock)?;
 
 IfInstruction:
-	'if' '(' conditions+=Expression ')' instructionBlocks+=InstructionBlock 
-	('else''if''('conditions+=Expression')' instructionBlocks += InstructionBlock)* 
+	'if' '(' conditions+=Expression ')' instructionBlocks+=InstructionBlock
+	('else''if''('conditions+=Expression')' instructionBlocks += InstructionBlock)*
 	('else' elseBlock=InstructionBlock)?;
 
 WhileInstruction:
 	'while' '(' condition=Expression ')' instructionBlock=InstructionBlock;
 
 ForEachInstruction:
-	'foreach' '(' (keyVar=Target ',')? valueVar=Target 'in' itterator=Expression ')'
+	'foreach' '(' (keyVar=Target ',')? valueVar=Target 'in' iterator=Expression ')'
 	instructionBlock=InstructionBlock;
 
 ReturnInstruction:
@@ -80,7 +80,7 @@ Target:
 	//An expression that holds a value
 Expression:
 	Assignment;
-	
+
 Assignment returns Expression:
 	Or ({Assignment.left=current} op=('='|'+='|'-='|'*='|'/='|'::=') right=Or)*;
 
@@ -115,7 +115,7 @@ Atomic returns Expression:
 
 CallbotExpression:
 	{CallbotExpression} 'callbot' '(' path = Expression (',' argument = Expression)? ')';
-	
+
 MapExpression:
 	'map''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
 ;
@@ -123,7 +123,7 @@ MapExpression:
 FilterExpression:
 	'filter''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
 ;
-	
+
 GetArgumentExpression:
 	{GetArgumentExpression} 'argument';
 
