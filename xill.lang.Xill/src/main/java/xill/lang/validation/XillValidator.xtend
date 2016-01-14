@@ -22,6 +22,11 @@ import com.google.inject.Inject
 import javax.inject.Named
 import java.io.File
 import com.google.inject.Provider
+import xill.lang.xill.ErrorInstruction
+import java.util.EventObject
+import xill.lang.xill.BreakInstruction
+import com.sun.org.apache.bcel.internal.generic.ReturnInstruction
+import xill.lang.xill.ContinueInstruction
 
 //import org.eclipse.xtext.validation.Check
 
@@ -126,6 +131,32 @@ class XillValidator extends AbstractXillValidator {
         }
 
     }
+    
+    @Check
+    def noInstructionFlowInErrorBlock(ErrorInstruction errorStatement) {
+    	System.out.println("Checking error statement")
+    	errorStatement.errorBlock.checkFlowControl();
+    	errorStatement.successBlock.checkFlowControl();
+    	errorStatement.finallyBlock.checkFlowControl();
+    }
+    
+    def void checkFlowControl(EObject object) {
+    	if(object == null) {
+    		return;
+    	}
+    	
+    	switch(object) {
+        	BreakInstruction: 
+        		error("You can only use the break statement in the 'do' block.", object, XillPackage.Literals.BREAK_INSTRUCTION__TEXT)
+    		ReturnInstruction: 
+        		error("You can only use the return statement in the 'do' block.", object, XillPackage.Literals.RETURN_INSTRUCTION__TEXT)
+    		ContinueInstruction: 
+        		error("You can only use the continue statement in the 'do' block.", object, XillPackage.Literals.CONTINUE_INSTRUCTION__TEXT)
+    	}
+    	
+    	object.eContents.forEach[checkFlowControl]
+    }
+    
 
     def InstructionSet getInstructionSet(EObject target) {
         var current = target

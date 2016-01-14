@@ -65,13 +65,13 @@ ForEachInstruction:
 	instructionBlock=InstructionBlock;
 
 ReturnInstruction:
-	'return' {ReturnInstruction} (value=Expression)? ';';
+	text = 'return' (value=Expression)? ';';
 
 BreakInstruction:
-	{BreakInstruction}'break' ';';
+	text = 'break' ';';
 
 ContinueInstruction:
-	{ContinueInstruction}'continue' ';';
+	text = 'continue' ';';
 
 	//A variable target
 Target:
