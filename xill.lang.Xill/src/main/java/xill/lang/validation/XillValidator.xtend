@@ -18,15 +18,13 @@ import xill.lang.xill.VariableDeclaration
 import xill.lang.xill.XillPackage
 import xill.lang.xill.impl.ExpressionImpl
 import xill.lang.xill.IncludeStatement
-import com.google.inject.Inject
-import javax.inject.Named
 import java.io.File
-import com.google.inject.Provider
 import xill.lang.xill.ErrorInstruction
-import java.util.EventObject
 import xill.lang.xill.BreakInstruction
-import com.sun.org.apache.bcel.internal.generic.ReturnInstruction
 import xill.lang.xill.ContinueInstruction
+import xill.lang.xill.ReturnInstruction
+import xill.lang.xill.WhileInstruction
+import xill.lang.xill.ForEachInstruction
 
 //import org.eclipse.xtext.validation.Check
 
@@ -134,27 +132,36 @@ class XillValidator extends AbstractXillValidator {
     
     @Check
     def noInstructionFlowInErrorBlock(ErrorInstruction errorStatement) {
-    	System.out.println("Checking error statement")
-    	errorStatement.errorBlock.checkFlowControl();
-    	errorStatement.successBlock.checkFlowControl();
-    	errorStatement.finallyBlock.checkFlowControl();
+    	errorStatement.errorBlock.checkFlowControl(false);
+    	errorStatement.successBlock.checkFlowControl(false);
+    	errorStatement.finallyBlock.checkFlowControl(false);
     }
     
-    def void checkFlowControl(EObject object) {
+    def void checkFlowControl(EObject object, boolean canBreak) {
     	if(object == null) {
     		return;
     	}
     	
     	switch(object) {
         	BreakInstruction: 
+        	if(!canBreak) {
         		error("You can only use the break statement in the 'do' block.", object, XillPackage.Literals.BREAK_INSTRUCTION__TEXT)
+    		}
+    		ContinueInstruction: 
+        	if(!canBreak) {
+        		error("You can only use the continue statement in the 'do' block.", object, XillPackage.Literals.CONTINUE_INSTRUCTION__TEXT)
+    		}
     		ReturnInstruction: 
         		error("You can only use the return statement in the 'do' block.", object, XillPackage.Literals.RETURN_INSTRUCTION__TEXT)
-    		ContinueInstruction: 
-        		error("You can only use the continue statement in the 'do' block.", object, XillPackage.Literals.CONTINUE_INSTRUCTION__TEXT)
-    	}
+			WhileInstruction:
+				object.eContents.forEach[obj|obj.checkFlowControl(true)]
+			ForEachInstruction:
+				object.eContents.forEach[obj|obj.checkFlowControl(true)]
+			default: 
+				object.eContents.forEach[obj|obj.checkFlowControl(canBreak)]
+		}
     	
-    	object.eContents.forEach[checkFlowControl]
+    	
     }
     
 
