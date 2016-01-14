@@ -45,7 +45,7 @@ class XillValidator extends AbstractXillValidator {
         "callbot","argument",
         "map", "filter",
         "private",
-        "do","success","error","finally"
+        "do","success","fail","finally"
     ];
     public static final Object LOCK = new Object()
 
