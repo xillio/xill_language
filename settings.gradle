@@ -1,3 +1,4 @@
+rootProject.name = 'xill_language'
 include 'xill.lang.Xill'
 
 // Temporarily disable web
