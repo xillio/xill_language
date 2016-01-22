@@ -104,10 +104,13 @@ ListExtraction returns Expression:
 	//An atomic value (i.e. not resulting from an operation)
 Atomic returns Expression:
 	Literal | FunctionCall | ConstructCall | Variable | '(' Expression ')' | ObjectExpression | ListExpression |
-	CallbotExpression | GetArgumentExpression | MapExpression | FilterExpression;
+	CallbotExpression | RunBulkExpression | GetArgumentExpression | MapExpression | FilterExpression;
 
 CallbotExpression:
 	{CallbotExpression} 'callbot' '(' path = Expression (',' argument = Expression)? ')';
+
+RunBulkExpression:
+	{RunBulkExpression} 'runBulk' '(' path = Expression ',' argument = Expression (',' options = Expression)? ')';
 	
 MapExpression:
 	'map''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
