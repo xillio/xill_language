@@ -22,6 +22,7 @@ import com.google.inject.Inject
 import javax.inject.Named
 import java.io.File
 import com.google.inject.Provider
+import xill.lang.xill.Target
 
 //import org.eclipse.xtext.validation.Check
 
@@ -112,6 +113,21 @@ class XillValidator extends AbstractXillValidator {
                 var node = NodeModelUtils.getNode(other);
 
                 error("A function with this name already exists at line: " + node.startLine, XillPackage.Literals.FUNCTION_DECLARATION__NAME);
+            }
+        }
+    }
+
+    @Check
+    def noVariableNameSameAsParameter(FunctionDeclaration declaration){
+        var parameters = declaration.getParameters;
+        var parentSet = declaration.instructionBlock.instructionSet
+
+        for (VariableDeclaration other : parentSet.instructions.filter(VariableDeclaration)){
+            for (Target otherP : parameters){
+                if(other.name != otherP && otherP.name == other.name.name){
+                    var node = NodeModelUtils.getNode(otherP);
+                    error("The variable '" + other.name.name + "' already exists as parameter in the function '" + declaration.name + "' at line: " + node.startLine, other.name,  XillPackage.Literals.TARGET__NAME );
+                }
             }
         }
     }
