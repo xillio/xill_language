@@ -40,7 +40,7 @@ class XillValidator extends AbstractXillValidator {
         "while","foreach", "in",
         "var","function",
         "return","continue","break",
-        "callbot","argument",
+        "callbot", "runBulk", "argument",
         "map", "filter",
         "private",
         "do","success","fail","finally"
