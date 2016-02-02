@@ -118,12 +118,13 @@ class XillValidator extends AbstractXillValidator {
     }
 
     @Check
-    def noVariableNameSameAsParameter(FunctionDeclaration declaration){
-        var parameters = declaration.getParameters;
-        var parentSet = declaration.instructionBlock.instructionSet
+    def noVariableNameSameAsParameter(VariableDeclaration declaration){
+
+        var parentSet = declaration.instructionSet;
+        var function = parentSet.instructions.findFirst(e| e == FunctionDeclaration) as FunctionDeclaration;
 
         for (VariableDeclaration other : parentSet.instructions.filter(VariableDeclaration)){
-            for (Target otherP : parameters){
+            for (Target otherP : function.parameters){
                 if(other.name != otherP && otherP.name == other.name.name){
                     var node = NodeModelUtils.getNode(otherP);
                     error("The variable '" + other.name.name + "' already exists as parameter in the function '" + declaration.name + "' at line: " + node.startLine, other.name,  XillPackage.Literals.TARGET__NAME );
