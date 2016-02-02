@@ -4,6 +4,7 @@
 package xill.lang.validation
 
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.common.util.EList
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
 import xill.lang.xill.Assignment
@@ -27,6 +28,7 @@ import xill.lang.xill.ContinueInstruction
 import xill.lang.xill.ReturnInstruction
 import xill.lang.xill.WhileInstruction
 import xill.lang.xill.ForEachInstruction
+
 
 //import org.eclipse.xtext.validation.Check
 
@@ -123,20 +125,29 @@ class XillValidator extends AbstractXillValidator {
     }
 
     @Check
-    def noVariableNameSameAsParameter(VariableDeclaration declaration){
+    def noVariableNameSameAsParameter(FunctionDeclaration declaration){
 
-        var parentSet = declaration.instructionSet;
-        var function = parentSet.instructions.findFirst(e| e == FunctionDeclaration) as FunctionDeclaration;
+        var parameters = declaration.parameters;
+        declaration.instructionBlock.recursiveCheck(parameters);
+    }
 
-        for (VariableDeclaration other : parentSet.instructions.filter(VariableDeclaration)){
-            for (Target otherP : function.parameters){
-                if(other.name != otherP && otherP.name == other.name.name){
-                    var node = NodeModelUtils.getNode(otherP);
-                    error("The variable '" + other.name.name + "' already exists as parameter in the function '" + declaration.name + "' at line: " + node.startLine, other.name,  XillPackage.Literals.TARGET__NAME );
+    def void recursiveCheck(EObject obj ,EList<Target> list){
+        if(obj == null){
+            return;
+        }
+
+        switch(obj){
+            VariableDeclaration:
+                for(Target t : list) {
+                    if(t.name == obj.name.name) {
+                        var node = NodeModelUtils.getNode(t);
+                        error("The variable '" + obj.name.name + "' already exists as a parameter in the function at line: " + node.startLine, obj.name,XillPackage.Literals.TARGET__NAME)
+                    }
                 }
-            }
+            default: obj.eContents.forEach[obj2|obj2.recursiveCheck(list)]
         }
     }
+
 
     @Check
     def includeRobotExists(IncludeStatement includeStatement) {
