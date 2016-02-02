@@ -25,6 +25,7 @@ import xill.lang.xill.VariableDeclaration
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import com.google.inject.Inject
 import javax.inject.Named
+import xill.lang.xill.ErrorInstruction
 
 /**
  * This class contains custom scoping description.
@@ -124,6 +125,11 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
                 }
                 FunctionDeclaration: {
                     targets.addAll(parent.parameters);
+                }
+                ErrorInstruction: {
+                    if(parent.cause != null) {
+                        targets.addAll(parent.cause);
+                    }
                 }
             }
         }

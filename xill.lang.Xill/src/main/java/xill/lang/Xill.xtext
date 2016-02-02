@@ -32,7 +32,8 @@ Instruction:
 	ForEachInstruction |
 	ReturnInstruction |
 	ContinueInstruction |
-	BreakInstruction;
+	BreakInstruction|
+	ErrorInstruction;
 
 ExpressionInstruction:
 	expression = Expression ';'
@@ -45,26 +46,32 @@ FunctionDeclaration:
 VariableDeclaration:
 	'var' name=Target ('=' value=Expression)? ';';
 
+ErrorInstruction:
+	'do' doBlock=InstructionBlock
+	('fail' ('(' (cause=Target)? ')')? errorBlock=InstructionBlock)?
+	('success' successBlock=InstructionBlock)?
+	('finally' finallyBlock=InstructionBlock)?;
+
 IfInstruction:
-	'if' '(' conditions+=Expression ')' instructionBlocks+=InstructionBlock 
-	('else''if''('conditions+=Expression')' instructionBlocks += InstructionBlock)* 
+	'if' '(' conditions+=Expression ')' instructionBlocks+=InstructionBlock
+	('else''if''('conditions+=Expression')' instructionBlocks += InstructionBlock)*
 	('else' elseBlock=InstructionBlock)?;
 
 WhileInstruction:
 	'while' '(' condition=Expression ')' instructionBlock=InstructionBlock;
 
 ForEachInstruction:
-	'foreach' '(' (keyVar=Target ',')? valueVar=Target 'in' itterator=Expression ')'
+	'foreach' '(' (keyVar=Target ',')? valueVar=Target 'in' iterator=Expression ')'
 	instructionBlock=InstructionBlock;
 
 ReturnInstruction:
-	'return' {ReturnInstruction} (value=Expression)? ';';
+	text = 'return' (value=Expression)? ';';
 
 BreakInstruction:
-	{BreakInstruction}'break' ';';
+	text = 'break' ';';
 
 ContinueInstruction:
-	{ContinueInstruction}'continue' ';';
+	text = 'continue' ';';
 
 	//A variable target
 Target:
@@ -73,7 +80,7 @@ Target:
 	//An expression that holds a value
 Expression:
 	Assignment;
-	
+
 Assignment returns Expression:
 	Or ({Assignment.left=current} op=('='|'+='|'-='|'*='|'/='|'::=') right=Or)*;
 
@@ -104,11 +111,14 @@ ListExtraction returns Expression:
 	//An atomic value (i.e. not resulting from an operation)
 Atomic returns Expression:
 	Literal | FunctionCall | ConstructCall | Variable | '(' Expression ')' | ObjectExpression | ListExpression |
-	CallbotExpression | GetArgumentExpression | MapExpression | FilterExpression;
+	CallbotExpression | RunBulkExpression | GetArgumentExpression | MapExpression | FilterExpression;
 
 CallbotExpression:
 	{CallbotExpression} 'callbot' '(' path = Expression (',' argument = Expression)? ')';
-	
+
+RunBulkExpression:
+	{RunBulkExpression} 'runBulk' '(' path = Expression ',' argument = Expression (',' options = Expression)? ')';
+
 MapExpression:
 	'map''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
 ;
@@ -116,7 +126,7 @@ MapExpression:
 FilterExpression:
 	'filter''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
 ;
-	
+
 GetArgumentExpression:
 	{GetArgumentExpression} 'argument';
 
