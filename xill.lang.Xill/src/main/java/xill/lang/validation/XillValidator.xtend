@@ -4,6 +4,7 @@
 package xill.lang.validation
 
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.common.util.EList
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
 import xill.lang.xill.Assignment
@@ -19,12 +20,15 @@ import xill.lang.xill.XillPackage
 import xill.lang.xill.impl.ExpressionImpl
 import xill.lang.xill.IncludeStatement
 import java.io.File
+import com.google.inject.Provider
+import xill.lang.xill.Target
 import xill.lang.xill.ErrorInstruction
 import xill.lang.xill.BreakInstruction
 import xill.lang.xill.ContinueInstruction
 import xill.lang.xill.ReturnInstruction
 import xill.lang.xill.WhileInstruction
 import xill.lang.xill.ForEachInstruction
+
 
 //import org.eclipse.xtext.validation.Check
 
@@ -121,6 +125,31 @@ class XillValidator extends AbstractXillValidator {
     }
 
     @Check
+    def noVariableNameSameAsParameter(FunctionDeclaration declaration){
+
+        var parameters = declaration.parameters;
+        declaration.instructionBlock.recursiveCheck(parameters);
+    }
+
+    def void recursiveCheck(EObject obj ,EList<Target> list){
+        if(obj == null){
+            return;
+        }
+
+        switch(obj){
+            VariableDeclaration:
+                for(Target t : list) {
+                    if(t.name == obj.name.name) {
+                        var node = NodeModelUtils.getNode(t);
+                        error("The variable '" + obj.name.name + "' already exists as a parameter in the function at line: " + node.startLine, obj.name,XillPackage.Literals.TARGET__NAME)
+                    }
+                }
+            default: obj.eContents.forEach[obj2|obj2.recursiveCheck(list)]
+        }
+    }
+
+
+    @Check
     def includeRobotExists(IncludeStatement includeStatement) {
         var path = includeStatement.name.join(File.separator) + ".xill"
         var robotFile = new File(projectFolder, path);
@@ -129,41 +158,41 @@ class XillValidator extends AbstractXillValidator {
         }
 
     }
-    
+
     @Check
     def noInstructionFlowInErrorBlock(ErrorInstruction errorStatement) {
     	errorStatement.errorBlock.checkFlowControl(false);
     	errorStatement.successBlock.checkFlowControl(false);
     	errorStatement.finallyBlock.checkFlowControl(false);
     }
-    
+
     def void checkFlowControl(EObject object, boolean canBreak) {
     	if(object == null) {
     		return;
     	}
-    	
+
     	switch(object) {
-        	BreakInstruction: 
+        	BreakInstruction:
         	if(!canBreak) {
         		error("You can only use the break statement in the 'do' block.", object, XillPackage.Literals.BREAK_INSTRUCTION__TEXT)
     		}
-    		ContinueInstruction: 
+    		ContinueInstruction:
         	if(!canBreak) {
         		error("You can only use the continue statement in the 'do' block.", object, XillPackage.Literals.CONTINUE_INSTRUCTION__TEXT)
     		}
-    		ReturnInstruction: 
+    		ReturnInstruction:
         		error("You can only use the return statement in the 'do' block.", object, XillPackage.Literals.RETURN_INSTRUCTION__TEXT)
 			WhileInstruction:
 				object.eContents.forEach[obj|obj.checkFlowControl(true)]
 			ForEachInstruction:
 				object.eContents.forEach[obj|obj.checkFlowControl(true)]
-			default: 
+			default:
 				object.eContents.forEach[obj|obj.checkFlowControl(canBreak)]
 		}
-    	
-    	
+
+
     }
-    
+
 
     def InstructionSet getInstructionSet(EObject target) {
         var current = target
