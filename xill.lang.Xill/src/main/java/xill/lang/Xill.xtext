@@ -44,7 +44,7 @@ FunctionDeclaration:
 	instructionBlock=InstructionBlock;
 
 VariableDeclaration:
-	'var' name=Target ('=' value=Expression)? ';';
+	type = ('var'|'argument') name=Target ('=' value=Expression)? ';';
 
 ErrorInstruction:
 	'do' doBlock=InstructionBlock
@@ -111,7 +111,7 @@ ListExtraction returns Expression:
 	//An atomic value (i.e. not resulting from an operation)
 Atomic returns Expression:
 	Literal | FunctionCall | ConstructCall | Variable | '(' Expression ')' | ObjectExpression | ListExpression |
-	CallbotExpression | RunBulkExpression | GetArgumentExpression | MapExpression | FilterExpression;
+	CallbotExpression | RunBulkExpression | MapExpression | FilterExpression;
 
 CallbotExpression:
 	{CallbotExpression} 'callbot' '(' path = Expression (',' argument = Expression)? ')';
@@ -126,9 +126,6 @@ MapExpression:
 FilterExpression:
 	'filter''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
 ;
-
-GetArgumentExpression:
-	{GetArgumentExpression} 'argument';
 
 ObjectExpression:
 	{ObjectExpression} '{' (names+=Expression ':' values+=Expression (',' names+=Expression ':' values+=Expression)*
