@@ -3,10 +3,12 @@ buildscript {
         maven {
             url 'https://maven.xillio.com/artifactory/plugins-release/'
         }
+        jcenter()
     }
     dependencies {
         classpath 'nl.xillio:gradle-config:1.1.2'
         classpath 'org.xtend:xtend-gradle-plugin:0.4.12'
+        classpath 'org.xtext:xtext-gradle-plugin:1.0.2'
     }
 }
 
@@ -40,4 +42,9 @@ subprojects {
         testCompile 'org.testng:testng:6.9.8'
         testCompile 'org.mockito:mockito-all:1.10.19'
     }
+}
+
+apply plugin: 'org.xtext.xtend'
+dependencies {
+    compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.9.2'
 }

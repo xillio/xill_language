@@ -111,7 +111,7 @@ ListExtraction returns Expression:
 	//An atomic value (i.e. not resulting from an operation)
 Atomic returns Expression:
 	Literal | FunctionCall | ConstructCall | Variable | '(' Expression ')' | ObjectExpression | ListExpression |
-	CallbotExpression | RunBulkExpression | MapExpression | FilterExpression;
+	CallbotExpression | RunBulkExpression | FunctionParameterExpression;
 
 CallbotExpression:
 	{CallbotExpression} 'callbot' '(' path = Expression (',' argument = Expression)? ')';
@@ -119,12 +119,18 @@ CallbotExpression:
 RunBulkExpression:
 	{RunBulkExpression} 'runBulk' '(' path = Expression ',' argument = Expression (',' options = Expression)? ')';
 
+FunctionParameterExpression:
+    MapExpression | FilterExpression | PeekExpression;
 MapExpression:
-	'map''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
+	'map''<'function = [FunctionDeclaration] '>''(' arguments = Expression ')'
 ;
 
 FilterExpression:
-	'filter''<'function = [FunctionDeclaration] '>''(' arguments += Expression (',' arguments += Expression) * ')'
+	'filter''<'function = [FunctionDeclaration] '>''(' arguments = Expression ')'
+;
+
+PeekExpression:
+	'peek''<'function = [FunctionDeclaration] '>''(' arguments = Expression ')'
 ;
 
 ObjectExpression:
