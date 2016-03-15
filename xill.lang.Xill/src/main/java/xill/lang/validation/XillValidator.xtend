@@ -28,6 +28,7 @@ import xill.lang.xill.ReturnInstruction
 import xill.lang.xill.WhileInstruction
 import xill.lang.xill.ForEachInstruction
 import xill.lang.xill.FunctionParameterExpression
+import xill.lang.xill.ReduceExpression
 
 /**
  * This class contains custom validation rules.
@@ -158,9 +159,14 @@ class XillValidator extends AbstractXillValidator {
 
     @Check
     def functionParameterExpressionArgumentCount(FunctionParameterExpression expression) {
+        var expectedCount = 1;
+        if(expression instanceof ReduceExpression) {
+            expectedCount = 2;
+        }
+
         var declaration = expression.function;
-        if(declaration.parameters.length != 1) {
-            error("Function " + declaration.name + " must accept exactly 1 argument for it to be used as a parameter", XillPackage.Literals.FUNCTION_PARAMETER_EXPRESSION__FUNCTION)
+        if(declaration.parameters.length != expectedCount) {
+            error("Function " + declaration.name + " must accept exactly " + expectedCount + " argument(s) for it to be used as a parameter.", XillPackage.Literals.FUNCTION_PARAMETER_EXPRESSION__FUNCTION)
         }
     }
 
