@@ -44,6 +44,7 @@ class XillValidator extends AbstractXillValidator {
         "return","continue","break",
         "callbot", "runBulk", "argument",
         "map", "filter", "peek",
+        "collect", "consume", "reduce", "foreach",
         "private",
         "do","success","fail","finally"
     ];
