@@ -1,6 +1,10 @@
 # Xill - Change Log
 All notable changes to this project will be documented in this file
 
+## [3.1.3] - 23-03-2016
+### Change
+- Terminal id for tokens, to fix exponential operator (`^`) [CTC-1316]
+
 ##[3.1.2] - 10-02-2016
 ### Change
 - The syntax of the argument keyword
