@@ -197,3 +197,4 @@ NullLiteral:
 terminal INT_VAL: ('0'..'9')+;
 terminal DEC_VAL:  ('0'..'9')+ '.'  ('0'..'9')+;
 terminal SCIENCE_VAL: (DEC_VAL|INT_VAL) 'E' ('+' | '-') INT_VAL;
+terminal ID: ('a'..'z'|'A'..'Z'|'_')('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
