@@ -20,7 +20,6 @@ import xill.lang.xill.XillPackage
 import xill.lang.xill.impl.ExpressionImpl
 import xill.lang.xill.IncludeStatement
 import java.io.File
-import com.google.inject.Provider
 import xill.lang.xill.Target
 import xill.lang.xill.ErrorInstruction
 import xill.lang.xill.BreakInstruction
@@ -28,9 +27,8 @@ import xill.lang.xill.ContinueInstruction
 import xill.lang.xill.ReturnInstruction
 import xill.lang.xill.WhileInstruction
 import xill.lang.xill.ForEachInstruction
-
-
-//import org.eclipse.xtext.validation.Check
+import xill.lang.xill.FunctionParameterExpression
+import xill.lang.xill.ReduceExpression
 
 /**
  * This class contains custom validation rules.
@@ -45,7 +43,8 @@ class XillValidator extends AbstractXillValidator {
         "var","function",
         "return","continue","break",
         "callbot", "runBulk", "argument",
-        "map", "filter",
+        "map", "filter", "peek",
+        "collect", "consume", "reduce", "foreach",
         "private",
         "do","success","fail","finally"
     ];
@@ -157,6 +156,19 @@ class XillValidator extends AbstractXillValidator {
             error("Could not find robot '" + robotFile.getCanonicalPath() + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__NAME)
         }
 
+    }
+
+    @Check
+    def functionParameterExpressionArgumentCount(FunctionParameterExpression expression) {
+        var expectedCount = 1;
+        if(expression instanceof ReduceExpression) {
+            expectedCount = 2;
+        }
+
+        var declaration = expression.function;
+        if(declaration.parameters.length != expectedCount) {
+            error("Function " + declaration.name + " must accept exactly " + expectedCount + " argument(s) for it to be used as a parameter.", XillPackage.Literals.FUNCTION_PARAMETER_EXPRESSION__FUNCTION)
+        }
     }
 
     @Check

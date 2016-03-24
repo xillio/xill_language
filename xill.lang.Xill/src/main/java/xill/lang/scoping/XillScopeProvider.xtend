@@ -23,8 +23,6 @@ import xill.lang.xill.UseStatement
 import xill.lang.xill.Variable
 import xill.lang.xill.VariableDeclaration
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
-import com.google.inject.Inject
-import javax.inject.Named
 import xill.lang.xill.ErrorInstruction
 
 /**
