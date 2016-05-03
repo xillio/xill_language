@@ -6,7 +6,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'nl.xillio:gradle-config:1.4.0'
+        classpath 'nl.xillio:gradle-config:1.4.1'
         classpath 'org.xtend:xtend-gradle-plugin:0.4.12'
         classpath 'org.xtext:xtext-gradle-plugin:1.0.2'
     }
