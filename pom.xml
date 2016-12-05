@@ -18,7 +18,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>xill.lang.Xill</groupId>
+	<groupId>nl.xillio.xill</groupId>
 	<version>3.2.0-SNAPSHOT</version>
 	<artifactId>xill.lang.Xill.parent</artifactId>
 	<packaging>pom</packaging>
@@ -59,7 +59,9 @@
                         <exclude>**/LICENSE</exclude>
                         <exclude>**/*._trace</exclude>
                         <exclude>**/*.xtendbin</exclude>
+                        <exclude>**/*.xtextbin</exclude>
                         <exclude>**/*.mwe2</exclude>
+                        <exclue>**/xtext-gen/**</exclue>
                     </excludes>
                     <mapping>
                         <fxml>XML_STYLE</fxml>
