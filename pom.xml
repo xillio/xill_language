@@ -1,3 +1,20 @@
+<!--
+
+    Copyright (C) 2015 Xillio (support@xillio.com)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -5,6 +22,7 @@
 	<version>3.2.0-SNAPSHOT</version>
 	<artifactId>xill.lang.Xill.parent</artifactId>
 	<packaging>pom</packaging>
+	<inceptionYear>2015</inceptionYear>
 
 	<properties>
 		<xtextVersion>2.10.0</xtextVersion>
@@ -17,6 +35,58 @@
 		<module>xill.lang.Xill</module>
 	</modules>
 	<build>
+		<plugins>
+			 <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
+                    <properties>
+                        <owner>Xillio</owner>
+                        <email>support@xillio.com</email>
+                    </properties>
+                    <strictCheck>true</strictCheck>
+                    <useDefaultExcludes>true</useDefaultExcludes>
+                    <aggregate>true</aggregate>
+                    <excludes>
+                        <exclude>**/build.xml</exclude>
+                        <exclude>**/maven-build.xml</exclude>
+                        <exclude>**/maven-build.properties</exclude>
+                        <exclude>.gitattributes</exclude>
+                        <exclude>LICENSE</exclude>
+                        <exclude>plugin-web/**/LICENSE.BSD</exclude>
+                        <exclude>**/LICENSE</exclude>
+                        <exclude>**/*._trace</exclude>
+                        <exclude>**/*.xtendbin</exclude>
+                        <exclude>**/*.mwe2</exclude>
+                    </excludes>
+                    <mapping>
+                        <fxml>XML_STYLE</fxml>
+                        <xill>JAVADOC_STYLE</xill>
+                        <xtext>JAVADOC_STYLE</xtext>
+                        <xtend>JAVADOC_STYLE</xtend>
+                        <Jenkinsfile>JAVADOC_STYLE</Jenkinsfile>
+                    </mapping>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate-license-headers</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate-license-headers</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
