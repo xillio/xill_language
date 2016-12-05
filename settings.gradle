@@ -1,6 +1,0 @@
-rootProject.name = 'xill_language'
-include 'xill.lang.Xill'
-
-// Temporarily disable web
-//include 'xill.lang.Xill.ide'
-//include 'xill.lang.Xill.web'
