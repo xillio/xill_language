@@ -12,9 +12,6 @@ Workflow {
 			project = StandardProjectConfig {
 				baseName = "xill.lang.Xill"
 				rootPath = rootPath
-				web = {
-					enabled = true
-				}
 				mavenLayout = true
 			}
 			code = {
