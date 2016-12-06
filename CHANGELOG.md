@@ -1,4 +1,4 @@
-# Xill - Change Log
+# Xill Language - Change Log
 All notable changes to this project will be documented in this file
 
 ## [3.1.4] - 24-03-2016
