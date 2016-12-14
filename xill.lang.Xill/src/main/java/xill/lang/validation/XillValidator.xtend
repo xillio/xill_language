@@ -176,7 +176,7 @@ class XillValidator extends AbstractXillValidator {
 
     @Check
     def includeRobotExists(IncludeStatement includeStatement) {
-        var path = includeStatement.name.join(File.separator) + ".xill"
+        var path = includeStatement.library.join(File.separator) + ".xill"
         var robotFile = new File(projectFolder, path);
         if(!robotFile.exists()) {
             error("Could not find robot '" + robotFile.getCanonicalPath() + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__NAME)

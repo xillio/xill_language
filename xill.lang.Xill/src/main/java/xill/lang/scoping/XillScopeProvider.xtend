@@ -71,28 +71,51 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     }
 
     def IScope getScope(FunctionCall functionCall) {
-        Scopes.scopeFor(functionCall.robot.functionDeclarations(new ArrayList<Resource>()));
+    	if(functionCall.library == null) {
+    		// This is a local or transitive function call
+    		return Scopes.scopeFor(#[functionCall.robot.functionDeclarations(new ArrayList<Robot>(), functionCall, true)]);
+    	} else {
+    		// This is a function in a different library
+    		var resource = functionCall.library.resolveResource() as Resource;
+    		return Scopes.scopeFor(resource.contents.filter(Robot).map[robot|robot.functionDeclarations(new ArrayList<Robot>(), functionCall, false)]);
+    	}
     }
 
-    def List<FunctionDeclaration> functionDeclarations(Robot robot, List<Resource> visited) {
-        var declarations = new ArrayList<FunctionDeclaration>();
-
-        //Add all local declarations
-        declarations.addAll(robot.instructionSet.instructions.filter(FunctionDeclaration));
-
-
-        //Add included libraries
-        for(Resource lib : robot.includes.map[resolveResource]) {
-            if(lib != null && !visited.contains(lib)) {
-                visited.add(lib);
-                declarations.addAll(lib.contents.filter(Robot).map[r | functionDeclarations(r,visited)].flatten.filter[fd | !fd.isPrivate()]);
-            }
+    def FunctionDeclaration functionDeclarations(Robot robot, List<Robot> visited, FunctionCall functionCall, boolean isLocal) {
+    	if(visited.contains(robot)) {
+    		return null;
+    	}
+        
+        visited.add(robot);
+    	
+        // Search local declarations
+        var result = robot.instructionSet.instructions
+    			.filter(FunctionDeclaration)
+    			.filter(fn|isLocal || !fn.isPrivate())
+    			.filter[fn|fn.name == functionCall.name]
+    			.findFirst[fn|fn.parameters.size == functionCall.argumentBlock.parameters.size];
+        
+        if(result != null) {
+        	return result;
         }
-        declarations;
+
+        // And search included libraries
+        return robot.includes
+        	// Only search in unqualified includes
+        	.filter[include|include.name == null]
+        	// Resolve the robots
+        	.map[resolveResource]
+        	.filterNull()
+        	.map[resource|resource.contents].flatten
+        	.filter(Robot)
+        	// Get all matching function declarations
+        	.map[library|library.functionDeclarations(visited, functionCall, false)]
+        	// Return the first result
+        	.findFirst[function|function != null];
     }
 
     def Resource resolveResource(IncludeStatement include) {
-        var path = include.name.join(File.separator) + ".xill";
+        var path = include.library.join(File.separator) + ".xill";
         var file = new File(projectFolder, path);
 
         var set = include.eResource.resourceSet;
