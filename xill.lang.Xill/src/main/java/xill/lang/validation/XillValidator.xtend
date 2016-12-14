@@ -20,7 +20,6 @@ import org.eclipse.emf.common.util.EList
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
 import xill.lang.xill.Assignment
-import xill.lang.xill.FunctionCall
 import xill.lang.xill.FunctionDeclaration
 import xill.lang.xill.InstructionSet
 import xill.lang.xill.ListExtraction
@@ -84,13 +83,6 @@ class XillValidator extends AbstractXillValidator {
     }
 
     @Check
-    def parameterCountMatchArguments(FunctionCall call) {
-        if(call.argumentBlock.parameters.size != call.name.parameters.size) {
-            error("Mismatched parameter count.", call.argumentBlock, XillPackage.Literals.ARGUMENT_BLOCK__PARAMETERS)
-        }
-    }
-
-    @Check
     def reservedKeywords(VariableDeclaration declaration) {
         if(RESERVED_KEYWORDS.contains(declaration.name.name)) {
             error("Reserved keyword `" + declaration.name.name + "`.", declaration.name, XillPackage.Literals.TARGET__NAME)
@@ -127,10 +119,10 @@ class XillValidator extends AbstractXillValidator {
         var parentSet = declaration.instructionSet;
 
         for(FunctionDeclaration other : parentSet.instructions.filter(FunctionDeclaration)) {
-            if(other != declaration && other.name == declaration.name) {
+            if(other != declaration && other.name == declaration.name && other.parameters.size == declaration.parameters.size) {
                 var node = NodeModelUtils.getNode(other);
 
-                error("A function with this name already exists at line: " + node.startLine, XillPackage.Literals.FUNCTION_DECLARATION__NAME);
+                error("A function with this signature already exists at line: " + node.startLine, XillPackage.Literals.FUNCTION_DECLARATION__NAME);
             }
         }
     }
@@ -179,7 +171,7 @@ class XillValidator extends AbstractXillValidator {
         var path = includeStatement.library.join(File.separator) + ".xill"
         var robotFile = new File(projectFolder, path);
         if(!robotFile.exists()) {
-            error("Could not find robot '" + robotFile.getCanonicalPath() + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__NAME)
+            error("Could not find robot '" + robotFile.getCanonicalPath() + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
         }
 
     }

@@ -28,7 +28,7 @@ UseStatement:
 
 IncludeStatement:
 	{IncludeStatement}
-	'include' library+=ID ('.' library+=ID)* ('as' name=ID)? ';';
+	'include' library+=ID ('.' library+=ID)* (qualified ?= 'as' name=ID)? ';';
 
 InstructionSet:
 	{InstructionSet}
@@ -177,7 +177,7 @@ Variable:
 
 	//A call of a function: log("value")
 FunctionCall:
-	(library=[IncludeStatement] '->')? name=[FunctionDeclaration] argumentBlock=ArgumentBlock;
+	(includeStatement=[IncludeStatement] qualified ?= '->')? name=[FunctionDeclaration] argumentBlock=ArgumentBlock;
 
 ConstructCall:
 	package=[UseStatement] '.' function=ID argumentBlock=ArgumentBlock;

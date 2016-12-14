@@ -59,6 +59,14 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
         switch(context) {
             FunctionCall: return getScope(context)
             UseStatement: return getScope(context)
+            IncludeStatement: return Scopes.scopeFor(
+        		context.resolveResource.contents
+        			.filter(Robot)
+        			.map(r|r.instructionSet.instructions)
+        			.flatten()
+        			.filter(FunctionDeclaration)
+        			.filter(fn|!fn.isPrivate)
+            )
             Variable: {
                 var parentSet = context.parent;
                 var node = NodeModelUtils.getNode(context)
@@ -71,36 +79,38 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     }
 
     def IScope getScope(FunctionCall functionCall) {
-    	if(functionCall.library == null) {
+    	if(!functionCall.isQualified()) {
     		// This is a local or transitive function call
-    		return Scopes.scopeFor(#[functionCall.robot.functionDeclarations(new ArrayList<Robot>(), functionCall, true)]);
+    		return Scopes.scopeFor(functionCall.robot.functionDeclarations(new ArrayList<Robot>(), functionCall, true));
     	} else {
     		// This is a function in a different library
-    		var resource = functionCall.library.resolveResource() as Resource;
-    		return Scopes.scopeFor(resource.contents.filter(Robot).map[robot|robot.functionDeclarations(new ArrayList<Robot>(), functionCall, false)]);
+    		var scope = functionCall.robot.includes;
+    		
+    		return Scopes.scopeFor(scope);
     	}
     }
 
-    def FunctionDeclaration functionDeclarations(Robot robot, List<Robot> visited, FunctionCall functionCall, boolean isLocal) {
+    def Iterable<EObject> functionDeclarations(Robot robot, List<Robot> visited, FunctionCall functionCall, boolean isLocal) {
     	if(visited.contains(robot)) {
-    		return null;
+    		return #[];
     	}
         
         visited.add(robot);
     	
+    	var result = new ArrayList<EObject>();
+    	
         // Search local declarations
-        var result = robot.instructionSet.instructions
+        result.addAll(
+        	robot.instructionSet.instructions
     			.filter(FunctionDeclaration)
     			.filter(fn|isLocal || !fn.isPrivate())
-    			.filter[fn|fn.name == functionCall.name]
-    			.findFirst[fn|fn.parameters.size == functionCall.argumentBlock.parameters.size];
-        
-        if(result != null) {
-        	return result;
-        }
-
+    			.filter[fn|fn.parameters.size == functionCall.argumentBlock.parameters.size]
+		);
+    			
+    			
         // And search included libraries
-        return robot.includes
+        result.addAll(
+        	robot.includes
         	// Only search in unqualified includes
         	.filter[include|include.name == null]
         	// Resolve the robots
@@ -110,18 +120,21 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
         	.filter(Robot)
         	// Get all matching function declarations
         	.map[library|library.functionDeclarations(visited, functionCall, false)]
-        	// Return the first result
-        	.findFirst[function|function != null];
+        	.flatten()
+       );
+        
+       return result.filterNull();
     }
 
     def Resource resolveResource(IncludeStatement include) {
         var path = include.library.join(File.separator) + ".xill";
         var file = new File(projectFolder, path);
-
+		var uri = URI.createFileURI(file.absolutePath);
+		
         var set = include.eResource.resourceSet;
 
         for(Resource resource : set.resources) {
-            if(resource.URI == URI.createFileURI(file.absolutePath)) {
+            if(resource.URI == uri) {
                 return resource
             }
         }
