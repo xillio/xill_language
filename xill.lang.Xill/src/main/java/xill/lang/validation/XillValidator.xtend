@@ -113,6 +113,20 @@ class XillValidator extends AbstractXillValidator {
             }
         }
     }
+    
+    @Check
+    def noDuplicateIncludes(IncludeStatement includeStatement) {
+    	if(includeStatement.qualified) {
+	        var robot = includeStatement.eContainer as Robot;
+	
+	        for(IncludeStatement other : robot.includes) {
+	            if(other != includeStatement && other.qualified && other.name == includeStatement.name) {
+	                var node = NodeModelUtils.getNode(other);
+	                error("An included library with this name already exists at line: " + node.startLine, includeStatement,  XillPackage.Literals.INCLUDE_STATEMENT__NAME);
+	            }
+	        }
+    	}
+    }
 
     @Check
     def noDuplicateFunctionNames(FunctionDeclaration declaration) {

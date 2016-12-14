@@ -39,6 +39,7 @@ import xill.lang.xill.Variable
 import xill.lang.xill.VariableDeclaration
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import xill.lang.xill.ErrorInstruction
+import xill.lang.xill.XillPackage
 
 /**
  * This class contains custom scoping description.
@@ -57,25 +58,22 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
 
     override getScope(EObject context, EReference reference) {
         switch(context) {
-            FunctionCall: return getScope(context)
+            FunctionCall: {
+            	if(reference == XillPackage.Literals.FUNCTION_CALL__INCLUDE_STATEMENT) {
+            		return Scopes.scopeFor(context.robot.includes);
+            	}
+            	return getScope(context)
+            }
             UseStatement: return getScope(context)
-            IncludeStatement: return Scopes.scopeFor(
-        		context.resolveResource.contents
-        			.filter(Robot)
-        			.map(r|r.instructionSet.instructions)
-        			.flatten()
-        			.filter(FunctionDeclaration)
-        			.filter(fn|!fn.isPrivate)
-            )
             Variable: {
                 var parentSet = context.parent;
                 var node = NodeModelUtils.getNode(context)
 
                 return getScope(parentSet, node.startLine);
             }
-            default: super.getScope(context, reference)
+            default: 
+            	return super.getScope(context, reference)
         }
-        super.getScope(context, reference)
     }
 
     def IScope getScope(FunctionCall functionCall) {
@@ -84,9 +82,18 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     		return Scopes.scopeFor(functionCall.robot.functionDeclarations(new ArrayList<Robot>(), functionCall, true));
     	} else {
     		// This is a function in a different library
-    		var scope = functionCall.robot.includes;
+    		var resource = functionCall.includeStatement.resolveResource;
     		
-    		return Scopes.scopeFor(scope);
+    		if(resource == null) {
+    			return Scopes.scopeFor(#[]);
+    		}
+    		
+    		return Scopes.scopeFor(
+    			resource.contents
+    				.filter(Robot)
+    				.map[robot|robot.functionDeclarations(new ArrayList<Robot>(), functionCall, false)]
+    				.flatten()
+    		);
     	}
     }
 
@@ -131,7 +138,12 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
         var file = new File(projectFolder, path);
 		var uri = URI.createFileURI(file.absolutePath);
 		
-        var set = include.eResource.resourceSet;
+		var containerResource = include.eResource;
+		if(containerResource == null) {
+			return null;
+		}
+		
+        var set = containerResource.resourceSet;
 
         for(Resource resource : set.resources) {
             if(resource.URI == uri) {
