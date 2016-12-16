@@ -1,6 +1,11 @@
 # Xill Language - Change Log
 All notable changes to this project will be documented in this file
 
+## [3.2.0] - 16-12-2016
+### Add
+- Qualified includes for xill libraries using the new `as` keyword [CTC-1946]
+- Function overloading based on parameters [CTC-1613]
+
 ## [3.1.4] - 24-03-2016
 ### Add
 - Keywords for pipeline processing (`map`, `filter`, `peek`, `collect`, `consume`, `reduce`, `foreach`) [CTC-1454][CTC-1455][CTC-1456][CTC-1458][CTC-1459]
