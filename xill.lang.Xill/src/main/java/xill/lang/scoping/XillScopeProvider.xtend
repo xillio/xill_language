@@ -119,7 +119,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
         result.addAll(
         	robot.includes
         	// Only search in unqualified includes
-        	.filter[include|include.name == null]
+        	.filter[include|!include.qualified]
         	// Resolve the robots
         	.map[resolveResource]
         	.filterNull()
