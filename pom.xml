@@ -212,4 +212,16 @@
 
 	<dependencies>
 	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<id>xillio-releases</id>
+			<url>https://maven.xillio.com/artifactory/oss-libs-release/</url>
+		</repository>
+		<snapshotRepository>
+			<id>xillio-snapshots</id>
+			<url>https://maven.xillio.com/artifactory/oss-libs-snapshot/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 </project>
