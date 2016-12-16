@@ -39,6 +39,7 @@ import xill.lang.xill.Variable
 import xill.lang.xill.VariableDeclaration
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import xill.lang.xill.ErrorInstruction
+import xill.lang.xill.XillPackage
 
 /**
  * This class contains custom scoping description.
@@ -57,7 +58,12 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
 
     override getScope(EObject context, EReference reference) {
         switch(context) {
-            FunctionCall: return getScope(context)
+            FunctionCall: {
+            	if(reference == XillPackage.Literals.FUNCTION_CALL__INCLUDE_STATEMENT) {
+            		return Scopes.scopeFor(context.robot.includes);
+            	}
+            	return getScope(context)
+            }
             UseStatement: return getScope(context)
             Variable: {
                 var parentSet = context.parent;
@@ -65,40 +71,82 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
 
                 return getScope(parentSet, node.startLine);
             }
-            default: super.getScope(context, reference)
+            default: 
+            	return super.getScope(context, reference)
         }
-        super.getScope(context, reference)
     }
 
     def IScope getScope(FunctionCall functionCall) {
-        Scopes.scopeFor(functionCall.robot.functionDeclarations(new ArrayList<Resource>()));
+    	if(!functionCall.isQualified()) {
+    		// This is a local or transitive function call
+    		return Scopes.scopeFor(functionCall.robot.functionDeclarations(new ArrayList<Robot>(), functionCall, true));
+    	} else {
+    		// This is a function in a different library
+    		var resource = functionCall.includeStatement.resolveResource;
+    		
+    		if(resource == null) {
+    			return Scopes.scopeFor(#[]);
+    		}
+    		
+    		return Scopes.scopeFor(
+    			resource.contents
+    				.filter(Robot)
+    				.map[robot|robot.functionDeclarations(new ArrayList<Robot>(), functionCall, false)]
+    				.flatten()
+    		);
+    	}
     }
 
-    def List<FunctionDeclaration> functionDeclarations(Robot robot, List<Resource> visited) {
-        var declarations = new ArrayList<FunctionDeclaration>();
-
-        //Add all local declarations
-        declarations.addAll(robot.instructionSet.instructions.filter(FunctionDeclaration));
-
-
-        //Add included libraries
-        for(Resource lib : robot.includes.map[resolveResource]) {
-            if(lib != null && !visited.contains(lib)) {
-                visited.add(lib);
-                declarations.addAll(lib.contents.filter(Robot).map[r | functionDeclarations(r,visited)].flatten.filter[fd | !fd.isPrivate()]);
-            }
-        }
-        declarations;
+    def Iterable<EObject> functionDeclarations(Robot robot, List<Robot> visited, FunctionCall functionCall, boolean isLocal) {
+    	if(visited.contains(robot)) {
+    		return #[];
+    	}
+        
+        visited.add(robot);
+    	
+    	var result = new ArrayList<EObject>();
+    	
+        // Search local declarations
+        result.addAll(
+        	robot.instructionSet.instructions
+    			.filter(FunctionDeclaration)
+    			.filter(fn|isLocal || !fn.isPrivate())
+    			.filter[fn|fn.parameters.size == functionCall.argumentBlock.parameters.size]
+		);
+    			
+    			
+        // And search included libraries
+        result.addAll(
+        	robot.includes
+        	// Only search in unqualified includes
+        	.filter[include|!include.qualified]
+        	// Resolve the robots
+        	.map[resolveResource]
+        	.filterNull()
+        	.map[resource|resource.contents].flatten
+        	.filter(Robot)
+        	// Get all matching function declarations
+        	.map[library|library.functionDeclarations(visited, functionCall, false)]
+        	.flatten()
+       );
+        
+       return result.filterNull();
     }
 
     def Resource resolveResource(IncludeStatement include) {
-        var path = include.name.join(File.separator) + ".xill";
+        var path = include.library.join(File.separator) + ".xill";
         var file = new File(projectFolder, path);
-
-        var set = include.eResource.resourceSet;
+		var uri = URI.createFileURI(file.absolutePath);
+		
+		var containerResource = include.eResource;
+		if(containerResource == null) {
+			return null;
+		}
+		
+        var set = containerResource.resourceSet;
 
         for(Resource resource : set.resources) {
-            if(resource.URI == URI.createFileURI(file.absolutePath)) {
+            if(resource.URI == uri) {
                 return resource
             }
         }
