@@ -40,6 +40,7 @@ import xill.lang.xill.VariableDeclaration
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import xill.lang.xill.ErrorInstruction
 import xill.lang.xill.XillPackage
+import xill.lang.xill.FunctionParameterExpression
 
 /**
  * This class contains custom scoping description.
@@ -57,12 +58,28 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     }
 
     override getScope(EObject context, EReference reference) {
+    	
+    	if(reference == XillPackage.Literals.FUNCTION_CALL__INCLUDE_STATEMENT ||
+    		reference == XillPackage.Literals.FUNCTION_PARAMETER_EXPRESSION__INCLUDE_STATEMENT) {
+    		return Scopes.scopeFor(context.robot.includes);
+    	}
+            	
         switch(context) {
             FunctionCall: {
-            	if(reference == XillPackage.Literals.FUNCTION_CALL__INCLUDE_STATEMENT) {
-            		return Scopes.scopeFor(context.robot.includes);
-            	}
-            	return getScope(context)
+            	return getScope(
+            		context.qualified,
+            		context.argumentBlock.parameters.size,
+            		context,
+            		context.includeStatement
+            	)
+            }
+            FunctionParameterExpression: {
+            	return getScope(
+            		context.qualified,
+            		1,
+            		context,
+            		context.includeStatement
+            	)
             }
             UseStatement: return getScope(context)
             Variable: {
@@ -76,13 +93,13 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
         }
     }
 
-    def IScope getScope(FunctionCall functionCall) {
-    	if(!functionCall.isQualified()) {
+    def IScope getScope(boolean isQualified, int parameterCount, EObject context, IncludeStatement includeStatement) {
+    	if(!isQualified) {
     		// This is a local or transitive function call
-    		return Scopes.scopeFor(functionCall.robot.functionDeclarations(new ArrayList<Robot>(), functionCall, true));
+    		return Scopes.scopeFor(context.robot.functionDeclarations(new ArrayList<Robot>(), parameterCount, true));
     	} else {
     		// This is a function in a different library
-    		var resource = functionCall.includeStatement.resolveResource;
+    		var resource = includeStatement.resolveResource;
     		
     		if(resource == null) {
     			return Scopes.scopeFor(#[]);
@@ -91,13 +108,13 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     		return Scopes.scopeFor(
     			resource.contents
     				.filter(Robot)
-    				.map[robot|robot.functionDeclarations(new ArrayList<Robot>(), functionCall, false)]
+    				.map[robot|robot.functionDeclarations(new ArrayList<Robot>(), parameterCount, false)]
     				.flatten()
     		);
     	}
     }
 
-    def Iterable<EObject> functionDeclarations(Robot robot, List<Robot> visited, FunctionCall functionCall, boolean isLocal) {
+    def Iterable<EObject> functionDeclarations(Robot robot, List<Robot> visited, int parameterCount, boolean isLocal) {
     	if(visited.contains(robot)) {
     		return #[];
     	}
@@ -111,7 +128,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
         	robot.instructionSet.instructions
     			.filter(FunctionDeclaration)
     			.filter(fn|isLocal || !fn.isPrivate())
-    			.filter[fn|fn.parameters.size == functionCall.argumentBlock.parameters.size]
+    			.filter[fn|fn.parameters.size == parameterCount]
 		);
     			
     			
@@ -126,7 +143,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
         	.map[resource|resource.contents].flatten
         	.filter(Robot)
         	// Get all matching function declarations
-        	.map[library|library.functionDeclarations(visited, functionCall, false)]
+        	.map[library|library.functionDeclarations(visited, parameterCount, false)]
         	.flatten()
        );
         
