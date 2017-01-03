@@ -41,6 +41,7 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import xill.lang.xill.ErrorInstruction
 import xill.lang.xill.XillPackage
 import xill.lang.xill.FunctionParameterExpression
+import xill.lang.xill.ReduceExpression
 
 /**
  * This class contains custom scoping description.
@@ -74,9 +75,15 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
             	)
             }
             FunctionParameterExpression: {
+            	
+            	var parameterCount = 1;
+            	if(context instanceof ReduceExpression) {
+            		parameterCount = 2;
+            	}
+            	
             	return getScope(
             		context.qualified,
-            		1,
+            		parameterCount,
             		context,
             		context.includeStatement
             	)
