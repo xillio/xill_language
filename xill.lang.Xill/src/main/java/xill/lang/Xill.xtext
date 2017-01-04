@@ -138,23 +138,23 @@ FunctionParameterExpression:
     MapExpression | FilterExpression | PeekExpression | ReduceExpression | ForeachExpression;
 
 MapExpression:
-	'map''<'function = [FunctionDeclaration] '>''(' argument = Expression ')'
+	'map''<'(includeStatement=[IncludeStatement] qualified ?= '->')? function=[FunctionDeclaration] '>''(' argument = Expression ')'
 ;
 
 FilterExpression:
-	'filter''<'function = [FunctionDeclaration] '>''(' argument = Expression ')'
+	'filter''<'(includeStatement=[IncludeStatement] qualified ?= '->')? function=[FunctionDeclaration]  '>''(' argument = Expression ')'
 ;
 
 PeekExpression:
-	'peek''<'function = [FunctionDeclaration] '>''(' argument = Expression ')'
+	'peek''<'(includeStatement=[IncludeStatement] qualified ?= '->')? function=[FunctionDeclaration]  '>''(' argument = Expression ')'
 ;
 
 ReduceExpression:
-	'reduce''<'function = [FunctionDeclaration] '>''(' accumulator = Expression ',' argument = Expression ')'
+	'reduce''<'(includeStatement=[IncludeStatement] qualified ?= '->')? function=[FunctionDeclaration] '>''(' accumulator = Expression ',' argument = Expression ')'
 ;
 
 ForeachExpression:
-	'foreach''<'function = [FunctionDeclaration] '>''(' argument = Expression ')'
+	'foreach''<'(includeStatement=[IncludeStatement] qualified ?= '->')? function=[FunctionDeclaration] '>''(' argument = Expression ')'
 ;
 
 CollectExpression:
