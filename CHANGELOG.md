@@ -1,6 +1,10 @@
 # Xill Language - Change Log
 All notable changes to this project will be documented in this file
 
+## [3.2.1] - 03-01-2016
+### Fix
+- Functions from qualified includes not usable in pipeline functions [CTC-2001]
+
 ## [3.2.0] - 16-12-2016
 ### Add
 - Qualified includes for xill libraries using the new `as` keyword [CTC-1946]
