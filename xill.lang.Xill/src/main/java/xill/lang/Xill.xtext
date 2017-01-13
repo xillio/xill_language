@@ -24,7 +24,7 @@ Robot:
 	instructionSet = InstructionSet;
 
 UseStatement:
-	(plugin=ID 'as')? name=ID ;
+	name=ID ;
 
 IncludeStatement:
 	{IncludeStatement}
