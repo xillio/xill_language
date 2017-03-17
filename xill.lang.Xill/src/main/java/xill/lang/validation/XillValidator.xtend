@@ -186,10 +186,7 @@ class XillValidator extends AbstractXillValidator {
         if(resourceUrl === null) {
             error("Could not resolve robot '" + fqn + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
         } else {
-            (includeStatement.eResource
-                .resourceSet
-                .getResource(URI.createURI(resourceUrl.toString()), true)
-                .contents.get(0) as Robot).fullyQualifiedName = fqn;
+            includeStatement.eResource.resourceSet.getResource(URI.createURI(resourceUrl.toString()), true);
         }
 
     }

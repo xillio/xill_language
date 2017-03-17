@@ -19,7 +19,6 @@ generate xill "http://www.lang.xill/Xill"
 
 //The main robot
 Robot:
-    fullyQualifiedName = 'undefined'
 	('use' uses += UseStatement (',' uses += UseStatement)* ';')*
 	(includes+=IncludeStatement)*
 	instructionSet = InstructionSet;
