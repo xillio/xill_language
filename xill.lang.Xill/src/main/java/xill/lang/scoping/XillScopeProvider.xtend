@@ -162,7 +162,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
 			return null;
 		}
 		
-		return include.eResource.resourceSet.getResource(URI.createURI(url.toString()), true);
+		return include.eResource.resourceSet.getResource(URI.createURI(url.toString()), false);
     }
 
     //We only scope to the local use statements
