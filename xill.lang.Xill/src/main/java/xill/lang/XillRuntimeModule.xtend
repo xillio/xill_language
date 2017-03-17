@@ -20,11 +20,28 @@ import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider
 import xill.lang.validation.ReservedKeywordErrorParser
 import com.google.inject.Provides
 import xill.lang.validation.UseIncludeKeywordErrorParser
+import xill.RobotLoader
+import com.google.inject.Binder
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class XillRuntimeModule extends AbstractXillRuntimeModule {
+	
+	private RobotLoader loader;
+	
+	new(RobotLoader robotLoader) {
+		loader = robotLoader;
+	}
+	
+	override configure(Binder binder) {
+		super.configure(binder);
+		binder.bind(RobotLoader).toInstance(loader);
+	}
+	
+	new(){
+		throw new IllegalArgumentException("Please provide a RobotLoader.");
+	}
 
     @Provides
     def ISyntaxErrorMessageProvider errorMessageProvider() {

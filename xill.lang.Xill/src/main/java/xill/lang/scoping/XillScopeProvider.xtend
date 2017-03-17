@@ -18,7 +18,6 @@
  */
 package xill.lang.scoping
 
-import java.io.File
 import java.util.ArrayList
 import java.util.List
 import org.eclipse.emf.common.util.URI
@@ -42,6 +41,8 @@ import xill.lang.xill.ErrorInstruction
 import xill.lang.xill.XillPackage
 import xill.lang.xill.FunctionParameterExpression
 import xill.lang.xill.ReduceExpression
+import xill.RobotLoader
+import com.google.inject.Inject
 
 /**
  * This class contains custom scoping description.
@@ -50,13 +51,9 @@ import xill.lang.xill.ReduceExpression
  * on how and when to use it.
  *
  */
-class XillScopeProvider extends AbstractDeclarativeScopeProvider {
-
-    private static File projectFolder = new File(".");
-
-    def static setProjectFolder(File folder) {
-        projectFolder = folder
-    }
+class XillScopeProvider extends AbstractDeclarativeScopeProvider {    
+    @Inject
+    private RobotLoader loader;
 
     override getScope(EObject context, EReference reference) {
     	
@@ -108,7 +105,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     		// This is a function in a different library
     		var resource = includeStatement.resolveResource;
     		
-    		if(resource == null) {
+    		if(resource === null) {
     			return Scopes.scopeFor(#[]);
     		}
     		
@@ -158,24 +155,14 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     }
 
     def Resource resolveResource(IncludeStatement include) {
-        var path = include.library.join(File.separator) + ".xill";
-        var file = new File(projectFolder, path);
-		var uri = URI.createFileURI(file.absolutePath);
+    	var fqn = include.library.join(".");
+    	var url = loader.getRobot(fqn);
 		
-		var containerResource = include.eResource;
-		if(containerResource == null) {
+		if(url===null){
 			return null;
 		}
 		
-        var set = containerResource.resourceSet;
-
-        for(Resource resource : set.resources) {
-            if(resource.URI == uri) {
-                return resource
-            }
-        }
-
-        return null
+		return include.eResource.resourceSet.getResource(URI.createURI(url.toString()), true);
     }
 
     //We only scope to the local use statements
@@ -190,7 +177,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
 
     //Get the scope of a Variable (Targets) that resides in this instructionSet
     def IScope getScope(InstructionSet set, int line) {
-        if(set == null)
+        if(set === null)
             return IScope.NULLSCOPE;
 
         //Find all variable declarations
@@ -199,12 +186,12 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
         var parent = set.eContainer.eContainer;
 
         //Special cases
-        if(parent != null) {
+        if(parent !== null) {
             switch(parent) {
                 ForEachInstruction: {
                     targets.add(parent.valueVar);
 
-                    if(parent.keyVar != null) {
+                    if(parent.keyVar !== null) {
                         targets.add(parent.keyVar);
                     }
                 }
@@ -212,7 +199,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
                     targets.addAll(parent.parameters);
                 }
                 ErrorInstruction: {
-                    if(parent.cause != null) {
+                    if(parent.cause !== null) {
                         targets.addAll(parent.cause);
                     }
                 }
@@ -226,7 +213,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
 
     //Get the parent InstructionSet
     def InstructionSet getParent(EObject object) {
-        if(object == null)
+        if(object === null)
             return null;
 
         var parent = object.eContainer;
@@ -239,7 +226,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
 
     def getRobot(EObject object) {
         var parent = object;
-        while(!(parent instanceof Robot) && parent != null) {
+        while(!(parent instanceof Robot) && parent !== null) {
             parent = parent.eContainer
         }
 

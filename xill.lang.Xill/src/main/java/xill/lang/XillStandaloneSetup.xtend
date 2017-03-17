@@ -18,9 +18,22 @@
  */
 package xill.lang
 
+import xill.RobotLoader
+import com.google.inject.Guice
+
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
  */
 class XillStandaloneSetup extends XillStandaloneSetupGenerated {
 
+	private RobotLoader loader;
+
+	new(RobotLoader loader) {
+		this.loader = loader;
+	}
+	
+	override createInjector() {
+		return Guice.createInjector(new XillRuntimeModule(loader));
+	}
+	
 }

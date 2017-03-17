@@ -17,6 +17,7 @@ package xill.lang.validation
 
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.common.util.EList
+import org.eclipse.emf.common.util.URI
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
 import xill.lang.xill.Assignment
@@ -30,7 +31,6 @@ import xill.lang.xill.VariableDeclaration
 import xill.lang.xill.XillPackage
 import xill.lang.xill.impl.ExpressionImpl
 import xill.lang.xill.IncludeStatement
-import java.io.File
 import xill.lang.xill.Target
 import xill.lang.xill.ErrorInstruction
 import xill.lang.xill.BreakInstruction
@@ -40,6 +40,8 @@ import xill.lang.xill.WhileInstruction
 import xill.lang.xill.ForEachInstruction
 import xill.lang.xill.FunctionParameterExpression
 import xill.lang.xill.ReduceExpression
+import xill.RobotLoader
+import com.google.inject.Inject
 
 /**
  * This class contains custom validation rules.
@@ -59,19 +61,15 @@ class XillValidator extends AbstractXillValidator {
         "private",
         "do","success","fail","finally"
     ];
-    public static final Object LOCK = new Object()
-
-    private static File projectFolder = new File(".")
-
-    def static setProjectFolder(File folder) {
-        projectFolder = folder
-    }
+    
+    @Inject
+    private RobotLoader loader;
 
 
     @Check
     def checkExtractionNotOnLiterals(ListExtraction extraction) {
         if(extraction.value.expression instanceof Literal) {
-            error("Cannot extract element from a literal.",extraction, if(extraction.child == null) XillPackage.Literals.LIST_EXTRACTION__INDEX else XillPackage.Literals.LIST_EXTRACTION__CHILD);
+            error("Cannot extract element from a literal.",extraction, if(extraction.child === null) XillPackage.Literals.LIST_EXTRACTION__INDEX else XillPackage.Literals.LIST_EXTRACTION__CHILD);
         }
     }
 
@@ -142,7 +140,7 @@ class XillValidator extends AbstractXillValidator {
     }
     
     /**
-     * I have been here since 5 dec 2015
+     * I have been here since 5 dec 2016
      */
     @Check
     def noBugsForYou(FunctionDeclaration declaration) {
@@ -163,7 +161,7 @@ class XillValidator extends AbstractXillValidator {
     }
 
     def void recursiveCheck(EObject obj ,EList<Target> list){
-        if(obj == null){
+        if(obj === null){
             return;
         }
 
@@ -182,10 +180,13 @@ class XillValidator extends AbstractXillValidator {
 
     @Check
     def includeRobotExists(IncludeStatement includeStatement) {
-        var path = includeStatement.library.join(File.separator) + ".xill"
-        var robotFile = new File(projectFolder, path);
-        if(!robotFile.exists()) {
-            error("Could not find robot '" + robotFile.getCanonicalPath() + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
+    	var fqn = includeStatement.library.join(".");
+    	var resourceUrl = loader.getRobot(fqn);
+
+        if(resourceUrl === null) {
+            error("Could not resolve robot '" + fqn + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
+        } else {
+            includeStatement.eResource.resourceSet.getResource(URI.createURI(resourceUrl.toString()), true);
         }
 
     }
@@ -211,7 +212,7 @@ class XillValidator extends AbstractXillValidator {
     }
 
     def void checkFlowControl(EObject object, boolean canBreak) {
-    	if(object == null) {
+    	if(object === null) {
     		return;
     	}
 
@@ -240,7 +241,7 @@ class XillValidator extends AbstractXillValidator {
 
     def InstructionSet getInstructionSet(EObject target) {
         var current = target
-        while(!(current == null || current instanceof InstructionSet)) {
+        while(!(current === null || current instanceof InstructionSet)) {
             current = current.eContainer
         }
         return current as InstructionSet
