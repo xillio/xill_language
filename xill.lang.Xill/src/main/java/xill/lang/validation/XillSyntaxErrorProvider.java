@@ -24,32 +24,7 @@ import java.util.List;
 
 
 public class XillSyntaxErrorProvider extends SyntaxErrorMessageProvider {
-    /*
-    override getSyntaxErrorMessage(IParserErrorContext context) {
-        var error = super.getSyntaxErrorMessage(context)
-        var exception = context.recognitionException;
-
-        switch(exception) {
-            MismatchedTokenException: {
-                //Exprected `RULE_ID` got `something`
-                if(exception.expecting == context.tokenNames.indexOf("RULE_ID")) {
-                    //Reserved keywords
-                    if(XillValidator.RESERVED_KEYWORDS.contains(exception.token.text)) {
-                        error = new SyntaxErrorMessage("Incorrect use of reserved keyword `" + exception.token.text + "`. Expected valid identifier.", error.issueCode, error.issueData)
-                    }
-                } else if(exception.expecting == context.tokenNames.indexOf("RULE_ID")) {
-
-                }
-            }
-        }
-
-        return error;
-    }
-
-    override getSyntaxErrorMessage(IValueConverterErrorContext context) {
-        super.getSyntaxErrorMessage(context)
-    }
-     */
+	
     private final List<TokenMismatchErrorParser> parsers;
 
     public XillSyntaxErrorProvider(List<TokenMismatchErrorParser> parsers) {

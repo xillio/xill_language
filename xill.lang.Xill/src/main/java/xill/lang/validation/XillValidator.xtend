@@ -17,7 +17,6 @@ package xill.lang.validation
 
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.common.util.EList
-import org.eclipse.emf.common.util.URI
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
 import xill.lang.xill.Assignment
@@ -40,8 +39,8 @@ import xill.lang.xill.WhileInstruction
 import xill.lang.xill.ForEachInstruction
 import xill.lang.xill.FunctionParameterExpression
 import xill.lang.xill.ReduceExpression
-import xill.RobotLoader
 import com.google.inject.Inject
+import xill.lang.XillResourceSet
 
 /**
  * This class contains custom validation rules.
@@ -61,10 +60,6 @@ class XillValidator extends AbstractXillValidator {
         "private",
         "do","success","fail","finally"
     ];
-    
-    @Inject
-    private RobotLoader loader;
-
 
     @Check
     def checkExtractionNotOnLiterals(ListExtraction extraction) {
@@ -181,14 +176,10 @@ class XillValidator extends AbstractXillValidator {
     @Check
     def includeRobotExists(IncludeStatement includeStatement) {
     	var fqn = includeStatement.library.join(".");
-    	var resourceUrl = loader.getRobot(fqn);
 
-        if(resourceUrl === null) {
+        if((includeStatement.eResource.resourceSet as XillResourceSet).getRobotResource(fqn) === null) {
             error("Could not resolve robot '" + fqn + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
-        } else {
-            includeStatement.eResource.resourceSet.getResource(URI.createURI(resourceUrl.toString()), true);
         }
-
     }
 
     @Check

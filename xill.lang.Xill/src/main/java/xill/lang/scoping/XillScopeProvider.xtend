@@ -20,7 +20,6 @@ package xill.lang.scoping
 
 import java.util.ArrayList
 import java.util.List
-import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.resource.Resource
@@ -41,8 +40,8 @@ import xill.lang.xill.ErrorInstruction
 import xill.lang.xill.XillPackage
 import xill.lang.xill.FunctionParameterExpression
 import xill.lang.xill.ReduceExpression
-import xill.RobotLoader
 import com.google.inject.Inject
+import xill.lang.XillResourceSet
 
 /**
  * This class contains custom scoping description.
@@ -51,9 +50,9 @@ import com.google.inject.Inject
  * on how and when to use it.
  *
  */
-class XillScopeProvider extends AbstractDeclarativeScopeProvider {    
+class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     @Inject
-    private RobotLoader loader;
+    private XillResourceSet resourceSet;
 
     override getScope(EObject context, EReference reference) {
     	
@@ -155,14 +154,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     }
 
     def Resource resolveResource(IncludeStatement include) {
-    	var fqn = include.library.join(".");
-    	var url = loader.getRobot(fqn);
-		
-		if(url===null){
-			return null;
-		}
-		
-		return include.eResource.resourceSet.getResource(URI.createURI(url.toString()), true);
+		return resourceSet.getRobotResource(include.library.join("."));
     }
 
     //We only scope to the local use statements
