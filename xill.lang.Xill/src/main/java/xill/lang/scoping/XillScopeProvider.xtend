@@ -40,7 +40,6 @@ import xill.lang.xill.ErrorInstruction
 import xill.lang.xill.XillPackage
 import xill.lang.xill.FunctionParameterExpression
 import xill.lang.xill.ReduceExpression
-import com.google.inject.Inject
 import xill.lang.XillResourceSet
 
 /**
@@ -51,8 +50,6 @@ import xill.lang.XillResourceSet
  *
  */
 class XillScopeProvider extends AbstractDeclarativeScopeProvider {
-    @Inject
-    private XillResourceSet resourceSet;
 
     override getScope(EObject context, EReference reference) {
     	
@@ -154,7 +151,7 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     }
 
     def Resource resolveResource(IncludeStatement include) {
-		return resourceSet.getRobotResource(include.library.join("."));
+		return (include.eResource.resourceSet as XillResourceSet).getRobotResource(include.library.join("."));
     }
 
     //We only scope to the local use statements
