@@ -151,7 +151,11 @@ class XillScopeProvider extends AbstractDeclarativeScopeProvider {
     }
 
     def Resource resolveResource(IncludeStatement include) {
-		return (include.eResource.resourceSet as XillResourceSet).getRobotResource(include.library.join("."));
+        var includeStatementResource = include.eResource;
+        if(includeStatementResource == null) {
+            return null;
+        }
+		return (includeStatementResource.resourceSet as XillResourceSet).getRobotResource(include.library.join("."));
     }
 
     //We only scope to the local use statements
