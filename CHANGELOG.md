@@ -1,11 +1,15 @@
 # Xill Language - Change Log
 All notable changes to this project will be documented in this file
 
-## [3.3.0] - 13-01-2016
+## [3.3.1] - 19-04-2017
+### Fix
+- Include casing not checked [CTC-1943]
+
+## [3.3.0] - 13-01-2017
 ### Change
 - Remove 'as' keyword from 'use' statement [CTC-1384]
 
-## [3.2.1] - 03-01-2016
+## [3.2.1] - 03-01-2017
 ### Fix
 - Functions from qualified includes not usable in pipeline functions [CTC-2001]
 

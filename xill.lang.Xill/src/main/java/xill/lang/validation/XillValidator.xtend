@@ -31,6 +31,8 @@ import xill.lang.xill.XillPackage
 import xill.lang.xill.impl.ExpressionImpl
 import xill.lang.xill.IncludeStatement
 import java.io.File
+import java.nio.file.Paths
+import java.nio.file.NoSuchFileException
 import xill.lang.xill.Target
 import xill.lang.xill.ErrorInstruction
 import xill.lang.xill.BreakInstruction
@@ -182,11 +184,18 @@ class XillValidator extends AbstractXillValidator {
 
     @Check
     def includeRobotExists(IncludeStatement includeStatement) {
-        var path = includeStatement.library.join(File.separator) + ".xill"
-        var robotFile = new File(projectFolder, path);
-        if(!robotFile.exists()) {
-            error("Could not find robot '" + robotFile.getCanonicalPath() + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
+        val pathString = includeStatement.library.join(File.separator) + ".xill"
+        try {
+            val path =  Paths.get(projectFolder.absolutePath, pathString)
+
+            if(path.toString() != path.toRealPath().toString()) {
+                error("Name of include does not match with robot on file system. You used: '" + path.toString() + "'. Found file: '" + path.toRealPath() + "'", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
+            }
+
+        } catch(NoSuchFileException e) {
+            error("Could not find robot: '" + pathString + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
         }
+
 
     }
 
