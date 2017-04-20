@@ -1,7 +1,7 @@
 # Xill Language - Change Log
 All notable changes to this project will be documented in this file
 
-## [3.3.1] - 19-04-2017
+## [3.3.1] - 20-04-2017
 ### Fix
 - Include casing not checked [CTC-1943]
 
