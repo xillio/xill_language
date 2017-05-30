@@ -1,6 +1,10 @@
 # Xill Language - Change Log
 All notable changes to this project will be documented in this file
 
+## [3.3.2] - unreleased
+### Add
+- Interface for RobotLoader (no functional change) [CTC-2121] 
+
 ## [3.3.1] - 20-04-2017
 ### Fix
 - Include casing not checked [CTC-1943]

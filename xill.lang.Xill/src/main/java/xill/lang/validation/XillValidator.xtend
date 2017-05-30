@@ -42,6 +42,8 @@ import xill.lang.xill.WhileInstruction
 import xill.lang.xill.ForEachInstruction
 import xill.lang.xill.FunctionParameterExpression
 import xill.lang.xill.ReduceExpression
+import com.google.inject.Inject
+import xill.lang.XillResourceSet
 
 /**
  * This class contains custom validation rules.
@@ -61,19 +63,11 @@ class XillValidator extends AbstractXillValidator {
         "private",
         "do","success","fail","finally"
     ];
-    public static final Object LOCK = new Object()
-
-    private static File projectFolder = new File(".")
-
-    def static setProjectFolder(File folder) {
-        projectFolder = folder
-    }
-
 
     @Check
     def checkExtractionNotOnLiterals(ListExtraction extraction) {
         if(extraction.value.expression instanceof Literal) {
-            error("Cannot extract element from a literal.",extraction, if(extraction.child == null) XillPackage.Literals.LIST_EXTRACTION__INDEX else XillPackage.Literals.LIST_EXTRACTION__CHILD);
+            error("Cannot extract element from a literal.",extraction, if(extraction.child === null) XillPackage.Literals.LIST_EXTRACTION__INDEX else XillPackage.Literals.LIST_EXTRACTION__CHILD);
         }
     }
 
@@ -144,7 +138,7 @@ class XillValidator extends AbstractXillValidator {
     }
     
     /**
-     * I have been here since 5 dec 2015
+     * I have been here since 5 dec 2016
      */
     @Check
     def noBugsForYou(FunctionDeclaration declaration) {
@@ -165,7 +159,7 @@ class XillValidator extends AbstractXillValidator {
     }
 
     def void recursiveCheck(EObject obj ,EList<Target> list){
-        if(obj == null){
+        if(obj === null){
             return;
         }
 
@@ -184,19 +178,11 @@ class XillValidator extends AbstractXillValidator {
 
     @Check
     def includeRobotExists(IncludeStatement includeStatement) {
-        val pathString = includeStatement.library.join(File.separator) + ".xill"
-        try {
-            val path =  Paths.get(projectFolder.absolutePath, pathString)
+    	var fqn = includeStatement.library.join(".");
 
-            if(path.toString() != path.toRealPath().toString()) {
-                error("Name of include does not match with robot on file system. You used: '" + path.toString() + "'. Found file: '" + path.toRealPath() + "'", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
-            }
-
-        } catch(NoSuchFileException e) {
-            error("Could not find robot: '" + pathString + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
+        if((includeStatement.eResource.resourceSet as XillResourceSet).getRobotResource(fqn) === null) {
+            error("Could not resolve robot '" + fqn + "'.", includeStatement, XillPackage.Literals.INCLUDE_STATEMENT__LIBRARY)
         }
-
-
     }
 
     @Check
@@ -220,7 +206,7 @@ class XillValidator extends AbstractXillValidator {
     }
 
     def void checkFlowControl(EObject object, boolean canBreak) {
-    	if(object == null) {
+    	if(object === null) {
     		return;
     	}
 
@@ -249,7 +235,7 @@ class XillValidator extends AbstractXillValidator {
 
     def InstructionSet getInstructionSet(EObject target) {
         var current = target
-        while(!(current == null || current instanceof InstructionSet)) {
+        while(!(current === null || current instanceof InstructionSet)) {
             current = current.eContainer
         }
         return current as InstructionSet
